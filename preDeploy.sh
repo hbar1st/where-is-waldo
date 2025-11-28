@@ -1,0 +1,1 @@
+git merge main --no-edit && git add dist -f && git commit -m "$1"

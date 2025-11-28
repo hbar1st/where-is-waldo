@@ -13,15 +13,15 @@
     </header>
     <section id="characters">
       <figure>
-        <img src="" alt="">
+        <img id="waldo" src="" alt="">
         <figcaption>Waldo</figcaption>
       </figure>
       <figure>
-        <img src="" alt="">
+        <img id="odlaw" src="" alt="">
         <figcaption>Odlaw</figcaption>
       </figure>
       <figure>
-        <img src="" alt="">
+        <img id="wizard-whitebeard" src="" alt="">
         <figcaption>Wizard Whitebear</figcaption>
       </figure>
     </section>

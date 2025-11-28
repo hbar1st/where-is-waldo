@@ -1,4 +1,5 @@
 import "./styles.css";
-import { greeting } from "./greeting.js";
+import { landingPage } from "./game.js";
 
 
+landingPage(document);

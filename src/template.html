@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
     <main>
-    <header>
-      <h1>Let's find Waldo, Odlaw and Wizard Whitebeard! Can you join the top ten?</h1>
-    </header>
-    <div id="content"></div>
+      <header>
+        <h1 id="message">
+          Loading...
+        </h1>
+      </header>
+      <section class="game" hidden>
+        <button id="show-top-ten" type="button">Top Ten</button>
+        <dialog id="top-ten-dialog">
+          <button autofocus>Close</button>
+          <p>This modal dialog has a groovy backdrop!</p>
+        </dialog>
+      </section>
+      <section class="game" hidden>
+        <h2>Click the button to view the scene. The image is presented in high resolution to help you find the Waldo. You will probably need to scroll to see the whole scene or you can use CTRL[-] to zoom out in your browser.</h2>
+        <button type="button">Start Game!</button>
+        <div id="scene"></div>
+      </section>
     </main>
-</body>
+  </body>
 </html>

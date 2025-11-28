@@ -14,8 +14,10 @@ main {
   flex-direction: column;
 }
 
-img {
+.scene img {
   z-index: 1;
+  width: auto;
+  height: auto;
 }
 
 ul {
@@ -56,3 +58,17 @@ li:hover {
   aspect-ratio: 1;
   border: .3rem solid blue;
 }
+
+::backdrop {
+  margin: initial;
+  padding: initial;
+  background-image: linear-gradient(
+    45deg,
+    magenta,
+    rebeccapurple,
+    dodgerblue,
+    green
+  );
+  opacity: 0.75;
+}
+
