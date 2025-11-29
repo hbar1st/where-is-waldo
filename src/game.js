@@ -1,24 +1,16 @@
 export { landingPage };
 
 function landingPage(docObj) {
-  const WALDO_API = "https://where-is-waldo-api-vczk.onrender.com";
 
-  const dialog = document.querySelector("#top-ten-dialog");
-  const showButton = document.querySelector("#show-top-ten");
-  const closeButton = document.querySelector("dialog button");
-  const sceneDiv = document.querySelector("#scene");
-  const gameSections = document.querySelectorAll(".game");
-  const messageEl = document.querySelector("#message");
-
-  // "Show the dialog" button opens the dialog modally
-  showButton.addEventListener("click", () => {
-    dialog.showModal();
-  });
-
-  // "Close" button closes the dialog
-  closeButton.addEventListener("click", () => {
-    dialog.close();
-  });
+  const dialog = docObj.querySelector("#top-ten-dialog");
+  const startButton = docObj.querySelector("#start");
+  const showButton = docObj.querySelector("#show-top-ten");
+  const closeButton = docObj.querySelector("dialog button");
+  const sceneDiv = docObj.querySelector("#scene");
+  const gameSections = docObj.querySelectorAll(".game");
+  const messageEl = docObj.querySelector("#message");
+  const topTenMessageEl = docObj.querySelector("#top-ten-message");
+  const charactersList = docObj.querySelector("#characters");
 
   // get the game response and characters to setup the play
   const setupresponse = async (api) => {
@@ -48,17 +40,60 @@ function landingPage(docObj) {
             credentials: "include",
           }
         );
-        if ((secondResponse.ok || secondResponse.status === 304) && secondResponse.body) {
+        if (
+          (secondResponse.ok || secondResponse.status === 304) &&
+          secondResponse.body
+        ) {
+          const characterData = await secondResponse.json();
+          console.log(characterData);
+          // prepare the scene image for display
           const image = new Image();
           image.src = sceneData.url;
           image.alt = "scene";
+          image.classList = "blur"; // we start out with a blurred image until the game is started officially
           sceneDiv.appendChild(image);
 
-          const characterData = await secondResponse.json();
-          console.log(characterData);
-          const sceneCharacters = characterData.characters.reduce((acc, el, i, arr) => i < arr.length - 1 ? acc += ", " + el : acc += " and " + el)
-          const h1 = `Let's find ${sceneCharacters}! This game will be timed. Will your time earn you a place in the top ten?`;
+          let sceneCharacters = "";
+          // display the characters
+          characterData.characters.forEach((el, i, arr) => {
+            console.log(el);
+            const listItem = docObj.createElement("li");
+            const labelEl = docObj.createElement("label");
+            labelEl.innerText = el.name;
+            const pic = new Image();
+            pic.src = el.url;
+            pic.alt = el.name;
+            sceneCharacters +=
+              i >= 0 && i < arr.length - 1 ? `${el.name}, ` : `and ${el.name}`;
+
+            labelEl.appendChild(pic);
+            listItem.appendChild(labelEl);
+            charactersList.appendChild(listItem);
+          });
+          // prepare statement on the scene characters
+          //const sceneCharacters = characterData.characters.reduce((acc, el, i, arr) => i < arr.length - 1 ? acc += ", " + el : acc += " and " + el)
+          const h1 = `Let's find ${sceneCharacters}!`;
+          const h2 = `This game will be timed! Will your time earn you a place in the top ten ?`;
           messageEl.innerText = h1;
+          topTenMessageEl.innerText = h2;
+
+          // add event listeners to the buttons
+          // "Show the dialog" button opens the dialog modally
+          showButton.addEventListener("click", () => {
+            dialog.showModal();
+          });
+
+          // "Close" button closes the dialog
+          closeButton.addEventListener("click", () => {
+            dialog.close();
+          });
+
+          startButton.addEventListener("click", () => {
+            // starts the game
+            // and removes the unnecessary text areas from the page for game mode
+            // and unblurs the scene
+          })
+          // show the sections on the page at last
           gameSections.forEach((el) => {
             el.toggleAttribute("hidden");
           });
@@ -74,8 +109,7 @@ function landingPage(docObj) {
     }
   };
 
-  //setupresponse(WALDO_API);
-  setupresponse("http://localhost:3000");
+  setupresponse(API_URL); // this value is replaced at runtime by webpack (the real value is in the webpack config files)
 }
 
 function displayGeneralError(messageEl) {
