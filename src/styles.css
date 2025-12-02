@@ -16,8 +16,7 @@ main {
   padding: 2px;
 }
 
-
-ul {
+ul#characters {
   grid-column: 2;
   display: grid;
   grid-template-rows: min(20dvh, 150px);
@@ -27,15 +26,15 @@ ul {
   justify-content: stretch;
   align-items: stretch;
   text-align: center;
-}
-li {
+
+> li {
   display: flex;
   padding: 0.5ch;
   max-width: 100%;
   overflow: clip;
   aspect-ratio: 1;
   justify-content: center;
-  
+
   > label {
     display: flex;
     flex-direction: column;
@@ -47,16 +46,16 @@ li {
     }
   }
 }
-li:hover > label {
+> li:hover > label {
   background-color: rgb(249 239 134);
   padding: 0.6ch 0.5ch 0.5ch 0.5ch;
 }
-
+}
 #targetting-window {
   visibility: hidden;
   z-index: 3;
   position: absolute;
-  
+
   /*
   width: 33px;
   height: 33px;
@@ -71,57 +70,56 @@ li:hover > label {
   margin: initial;
   padding: initial;
   background-image: linear-gradient(
-  45deg,
-  magenta,
-  rebeccapurple,
-  dodgerblue,
-  green
+    45deg,
+    magenta,
+    rebeccapurple,
+    dodgerblue,
+    green
   );
   opacity: 0.75;
 }
 
 .game:not([hidden]) {
   display: grid;
-  
+
   grid-template-columns: 100px 1fr;
   grid-template-rows: repeat(4, auto);
-  
+
   max-width: min(100vw, 1000px);
   row-gap: 1rem;
   column-gap: 1rem;
-  
+
   justify-content: stretch;
   align-items: stretch;
-  
-  > section:nth-of-type(-n+3) {
+
+  > section:nth-of-type(-n + 3) {
     display: grid;
     grid-template-columns: subgrid;
     grid-template-rows: auto;
     margin-left: 1rem;
   }
-  
+
   > section {
     grid-column: 1 / -1;
   }
 
-  > section:has(>button:disabled) {
+  > section:has(> button:disabled) {
     display: none;
   }
-  
+
   > #scene {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    margin-left: .8rem;
-    
+    margin-left: 0.8rem;
+
     > label {
       display: flex;
       flex-direction: row;
       justify-content: center;
       align-items: center;
-      
-      
+
       > button {
         width: 50px;
         display: grid;
@@ -131,7 +129,7 @@ li:hover > label {
         background-position: 50px 0px;
         border: 3px inset black;
       }
-      
+
       > button:hover {
         background-position: 0px 50px;
       }
@@ -144,7 +142,7 @@ li:hover > label {
         aspect-ratio: 1;
         user-select: none;
       }
-      
+
       > button.offPos::after {
         content: "";
         background-color: #fff493;
@@ -152,9 +150,9 @@ li:hover > label {
         width: 49%;
         margin: 1px;
         aspect-ratio: 1;
-        animation: .05s linear 1 forwards toggle-motion-right;
+        animation: 0.05s linear 1 forwards toggle-motion-right;
       }
-      
+
       > button.onPos::after {
         content: "";
         background-color: fff493;
@@ -162,12 +160,11 @@ li:hover > label {
         width: 49%;
         margin: 1px;
         aspect-ratio: 1;
-        animation: .05s linear  1 forwards toggle-motion-left  ;
+        animation: 0.05s linear 1 forwards toggle-motion-left;
       }
-      
     }
   }
-  
+
   > section:first-child > p:first-child {
     height: 100%;
     width: 100%;
@@ -179,7 +176,12 @@ li:hover > label {
     background-color: yellow;
     font-family: fantasy;
     letter-spacing: 0.1ch;
-    background: linear-gradient(90deg, #FFEB3B, transparent 95%, transparent 100%);
+    background: linear-gradient(
+      90deg,
+      #ffeb3b,
+      transparent 95%,
+      transparent 100%
+    );
   }
   button {
     align-self: center;
@@ -193,7 +195,6 @@ li:hover > label {
     border-radius: 5px;
   }
 }
-
 
 @keyframes toggle-motion-right {
   0% {
@@ -226,11 +227,36 @@ main > header {
   color: #86572e;
 }
 
+ul#menu {
+  visibility: hidden;
+  display: flex;
+  width: max-content;
+  flex-wrap: no-wrap;
+  flex-direction: column;
+  list-style-type: none;
+  position: absolute;
+  z-index: 2;
+  color: black;
+  background-color: white;
+  padding: 0.5ch;
+  justify-content: stretch;
+  align-items: stretch;
+  text-align: center;
+
+  > li {
+    padding: 0.5ch;
+  }
+  > li:hover {
+    background-color: yellow;
+    padding: 0.6ch 0.5ch 0.5ch 0.5ch;
+  }
+}
+
 @media only screen and (max-width: 600px) {
   ul {
     display: flex;
     flex-direction: column;
-    
+
     img {
       max-width: 100px;
       max-height: 30dvw;

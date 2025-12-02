@@ -1,6 +1,6 @@
 export { landingPage };
 
-function landingPage(docObj) {
+async function landingPage(docObj) {
   const dialog = docObj.querySelector("#top-ten-dialog");
   const startButton = docObj.querySelector("#start");
   const showButton = docObj.querySelector("#show-top-ten");
@@ -37,9 +37,9 @@ function landingPage(docObj) {
         );
         sceneSection.classList.remove("blur");
       } else {
-                const sceneSection = docObj.querySelector(
-                  ".game > section:last-of-type"
-                );
+        const sceneSection = docObj.querySelector(
+          ".game > section:last-of-type"
+        );
         sceneSection.classList.add("blur"); // we start out with a blurred image until the game is started officially
       }
       
@@ -85,7 +85,12 @@ function landingPage(docObj) {
           messageEl.innerText = h1;
           topTenMessageEl.innerText = h2;
           
-          // add event listeners to the buttons
+          // add event listener to the scene
+          sceneImage.addEventListener("mousedown", (e) =>
+            displayChoice(e, docObj, sceneImage, api)
+          );
+          
+
           // "Show the dialog" button opens the dialog modally
           showButton.addEventListener("click", () =>
             showTopTen(docObj, api, sceneId, dialog)
@@ -129,7 +134,7 @@ function landingPage(docObj) {
 }
 };
 
-setupresponse(API_URL); // this value is replaced at runtime by webpack (the real value is in the webpack config files)
+  await setupresponse(API_URL); // this value is replaced at runtime by webpack (the real value is in the webpack config files)
 }
 
 function displayGeneralError(messageEl) {
@@ -230,3 +235,80 @@ function resolutionToggle(resolutionButton, sceneImage) {
   }
 }
 
+async function displayChoice(e, docObj, imgRef, api) {
+
+  const gameData = await getGameData(api);
+  console.log(gameData)
+  const characterData = gameData.game.scene.characters;
+
+  const menuRef = document.querySelector("#menu");
+  const targetWindowRef = document.querySelector("#targetting-window");
+
+  // setup the menu's contents with the character names
+  menuRef.innerHTML = ""; //clear the list then add the names
+  characterData.forEach((el) => {
+    const listItem = docObj.createElement("li");
+    listItem.innerText = el;
+    menuRef.appendChild(listItem);
+  });
+
+  // what are the menu's height and width?
+  const menuHeight = menuRef.offsetHeight;
+  const menuWidth = menuRef.offsetWidth;
+
+  // the apothem is the distance from the center of the square to the midpoint of the side
+  const targetWindowApothem = targetWindowRef.offsetHeight >> 1; //divide by 2
+
+  // image boundary
+  const imgRect = imgRef.getBoundingClientRect();
+  console.log("image rect: ", imgRect.x, imgRect.y);
+
+  // what are the image's top left corner coordinates to orient ourselves to?
+  const relY = Math.floor(Number(e.clientY) - Math.abs(imgRect.top));
+  const relX = Math.floor(Number(e.clientX) - Math.abs(imgRect.left));
+
+  // the viewable max width and height of the image
+  const viewWidth = window.innerWidth || docObj.documentElement.clientWidth;
+  const viewHeight = window.innerHeight || docObj.documentElement.clientHeight;
+
+  console.log("(clientX,clientY): ", e.clientX, e.clientY, relX, relY);
+  console.log(
+    "(viewWidth,viewHeight)",
+    docObj.documentElement.clientWidth,
+    docObj.documentElement.clientHeight
+  );
+
+  let menuLeft = relX;
+  let menuTop = relY;
+
+  if (e.clientX + menuWidth > viewWidth - 10) {
+    menuLeft -= menuWidth + 15;
+
+    console.log(`instead of X ${e.clientX} move to ${menuLeft}`);
+  } else {
+    menuLeft += 15;
+  }
+
+  if (e.clientY + menuHeight > viewHeight - 10) {
+    console.log("show above");
+    menuTop -= menuHeight;
+  }
+
+  // offset due to scrolling or other elements on the page taking space
+  const xOffset = Math.abs(imgRect.x) + window.scrollX;
+  const yOffset = Math.abs(imgRect.y) + window.scrollY;
+
+  // now position the menu to the final position
+  menuRef.style.left = makePx(menuLeft + xOffset);
+  menuRef.style.top = makePx(menuTop + yOffset);
+  menuRef.style.visibility = "visible";
+
+  // as for the targetting window, center it around the clicked position
+  targetWindowRef.style.left = makePx(relX - targetWindowApothem + xOffset);
+  targetWindowRef.style.top = makePx(relY - targetWindowApothem + yOffset);
+  targetWindowRef.style.visibility = "visible";
+}
+
+function makePx(str) {
+  return `${str}px`;
+}
