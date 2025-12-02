@@ -9,7 +9,7 @@ main {
 }
 
 #scene img {
-  margin: 1rem;
+  margin: 1rem 0rem;
   grid-column: 1 / -1;
   max-width: calc(100% - 2rem);
   border: 2px ridge black;
@@ -47,8 +47,8 @@ li {
     }
   }
 }
-li:hover {
-  background-color: yellow;
+li:hover > label {
+  background-color: rgb(249 239 134);
   padding: 0.6ch 0.5ch 0.5ch 0.5ch;
 }
 
@@ -97,10 +97,15 @@ li:hover {
     display: grid;
     grid-template-columns: subgrid;
     grid-template-rows: auto;
+    margin-left: 1rem;
   }
   
   > section {
     grid-column: 1 / -1;
+  }
+
+  > section:has(>button:disabled) {
+    display: none;
   }
   
   > #scene {
@@ -108,12 +113,14 @@ li:hover {
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
+    margin-left: .8rem;
     
     > label {
       display: flex;
       flex-direction: row;
       justify-content: center;
       align-items: center;
+      
       
       > button {
         width: 50px;
@@ -162,23 +169,28 @@ li:hover {
   }
   
   > section:first-child > p:first-child {
-    margin: 5px;
     height: 100%;
     width: 100%;
     text-wrap-style: balance;
     text-wrap-mode: wrap;
     text-align: center;
-    padding: 5px;
+    padding: 1rem;
     display: flex;
     background-color: yellow;
     font-family: fantasy;
     letter-spacing: 0.1ch;
+    background: linear-gradient(90deg, #FFEB3B, transparent 95%, transparent 100%);
   }
   button {
+    align-self: center;
+    justify-self: center;
     margin: 5px;
     height: 100%;
     width: 100%;
     min-width: max-content;
+    background-color: yellow;
+    font-weight: 600;
+    border-radius: 5px;
   }
 }
 
