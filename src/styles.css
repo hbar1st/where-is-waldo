@@ -26,100 +26,131 @@ ul#characters {
   justify-content: stretch;
   align-items: stretch;
   text-align: center;
-
-> li {
-  display: flex;
-  padding: 0.5ch;
-  max-width: 100%;
-  overflow: clip;
-  aspect-ratio: 1;
-  justify-content: center;
-
-  > label {
+  
+  > li {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    > img {
-      max-width: 140px;
-      max-height: 30dvh;
-      min-width: 140px;
+    padding: 0.5ch;
+    max-width: 100%;
+    overflow: clip;
+    aspect-ratio: 1;
+    justify-content: center;
+    
+    > label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      > img {
+        max-width: 140px;
+        max-height: 30dvh;
+        min-width: 140px;
+      }
     }
   }
-}
-> li:hover > label {
-  background-color: rgb(249 239 134);
-  padding: 0.6ch 0.5ch 0.5ch 0.5ch;
-}
+  > li:hover > label {
+    background-color: rgb(249 239 134);
+    padding: 0.6ch 0.5ch 0.5ch 0.5ch;
+  }
 }
 #targetting-window {
   visibility: hidden;
   z-index: 3;
   position: absolute;
-
+  
   /*
   width: 33px;
   height: 33px;
   border: 5px solid blue;
   */
-  width: 3%;
+  min-width: 16px;
   aspect-ratio: 1;
-  border: 0.3rem solid blue;
+  border: 0.3rem solid blue;  
+  border-image: linear-gradient(0deg, rgb(0, 71, 0), lightgreen);  
+  border-image-slice: 1;
+}
+
+#targetting-window.shimmer {
+  animation: 2s cubic-bezier(0.1, -0.6, 0.2, 0) infinite alternate shimmer;
+}
+
+@keyframes shimmer {
+  0% {    
+    border-image: linear-gradient(0deg, rgb(0, 71, 0), lightgreen);  
+    border-image-slice: 1;
+  }
+
+  25% {
+    
+    border-image: linear-gradient(90deg,  rgb(0, 71, 0), lightgreen);  
+    border-image-slice: 1;
+
+  }
+  50% {
+    border-image: linear-gradient(180deg,  rgb(0, 71, 0), lightgreen);  
+    border-image-slice: 1;
+  }
+  
+  75% {
+    
+    border-image: linear-gradient(270deg, rgb(0, 71, 0), lightgreen);  
+    border-image-slice: 1;
+  }
+  
 }
 
 ::backdrop {
   margin: initial;
   padding: initial;
   background-image: linear-gradient(
-    45deg,
-    magenta,
-    rebeccapurple,
-    dodgerblue,
-    green
+  45deg,
+  magenta,
+  rebeccapurple,
+  dodgerblue,
+  green
   );
   opacity: 0.75;
 }
 
 .game:not([hidden]) {
   display: grid;
-
+  
   grid-template-columns: 100px 1fr;
   grid-template-rows: repeat(4, auto);
-
+  
   max-width: min(100vw, 1000px);
   row-gap: 1rem;
   column-gap: 1rem;
-
+  
   justify-content: stretch;
   align-items: stretch;
-
+  
   > section:nth-of-type(-n + 3) {
     display: grid;
     grid-template-columns: subgrid;
     grid-template-rows: auto;
     margin-left: 1rem;
   }
-
+  
   > section {
     grid-column: 1 / -1;
   }
-
+  
   > section:has(> button:disabled) {
     display: none;
   }
-
+  
   > #scene {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     margin-left: 0.8rem;
-
+    
     > label {
       display: flex;
       flex-direction: row;
       justify-content: center;
       align-items: center;
-
+      
       > button {
         width: 50px;
         display: grid;
@@ -129,7 +160,7 @@ ul#characters {
         background-position: 50px 0px;
         border: 3px inset black;
       }
-
+      
       > button:hover {
         background-position: 0px 50px;
       }
@@ -142,7 +173,7 @@ ul#characters {
         aspect-ratio: 1;
         user-select: none;
       }
-
+      
       > button.offPos::after {
         content: "";
         background-color: #fff493;
@@ -152,7 +183,7 @@ ul#characters {
         aspect-ratio: 1;
         animation: 0.05s linear 1 forwards toggle-motion-right;
       }
-
+      
       > button.onPos::after {
         content: "";
         background-color: fff493;
@@ -164,7 +195,7 @@ ul#characters {
       }
     }
   }
-
+  
   > section:first-child > p:first-child {
     height: 100%;
     width: 100%;
@@ -177,10 +208,10 @@ ul#characters {
     font-family: fantasy;
     letter-spacing: 0.1ch;
     background: linear-gradient(
-      90deg,
-      #ffeb3b,
-      transparent 95%,
-      transparent 100%
+    90deg,
+    #ffeb3b,
+    transparent 95%,
+    transparent 100%
     );
   }
   button {
@@ -242,7 +273,7 @@ ul#menu {
   justify-content: stretch;
   align-items: stretch;
   text-align: center;
-
+  
   > li {
     padding: 0.5ch;
   }
@@ -252,11 +283,24 @@ ul#menu {
   }
 }
 
+#wrong {
+  visibility: hidden;
+  position: absolute;
+  z-index: 2;
+  color: black;
+  background-color: white;
+  padding: 0.5ch;
+  text-align: center;
+  user-select: none;
+      background-color: red;
+    color: white;
+}
+
 @media only screen and (max-width: 600px) {
   ul {
     display: flex;
     flex-direction: column;
-
+    
     img {
       max-width: 100px;
       max-height: 30dvw;
