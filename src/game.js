@@ -238,7 +238,10 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
     if (topTen.topTen.length === 0) {
       
       paragraphEl.innerText = "No top scores recorded yet! Be the first!";
+      topTenForm.style.display = "none";
     } else {
+      
+      topTenForm.style.display = "block";
       // display the list of players and their scores in the topTen.topTen array
       paragraphEl.innerText = "Top 10"
       // and highlight the current player in the list
@@ -516,7 +519,7 @@ async function characterChoiceHandler(target, docObj, api, x, y, { sceneId, imgR
         headers,
         credentials: "include",
       });
-      if (topTenResponse.ok && topTenResponse.body) {
+      if (topTenResponse.status === 201 && topTenResponse.body) {
         // check if the user id is in the list of top ten scores and if yes, trigger the top ten dialog
         
         const topTenData = await topTenResponse.json();
@@ -532,14 +535,16 @@ async function characterChoiceHandler(target, docObj, api, x, y, { sceneId, imgR
         );
       }
     }
-  } else if (getGameResponse.status === 400) {
-    // this is the wrong answer or a validation error has happened.
+  } else if (getGameResponse.status === 200) {
+    // this is the wrong answer 
     
     const gameData = await getGameResponse.json();
     console.log(gameData);
     if (gameData.message === "Wrong answer") {
       showWrongAnswerMsg(docObj);
     }
+  } else {
+    console.error("response was not what we expected for this part of the game")
   }
 }
 
