@@ -9,11 +9,16 @@ main {
 }
 
 #scene img {
-  margin: 1rem 0rem;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+#scene #image-enclosure {
+  user-select: none;
   grid-column: 1 / -1;
-  max-width: calc(100% - 2rem);
   border: 2px ridge black;
   padding: 2px;
+  margin: 1rem;
 }
 
 ul#characters {
@@ -72,17 +77,30 @@ ul#characters {
   animation: 2s cubic-bezier(0.1, -0.6, 0.2, 0) infinite alternate shimmer;
 }
 
+#tag {
+  background-color: transparent;
+  color: transparent;
+  z-index: 2;
+  position: absolute;
+}
+
+#tag:hover {
+  background-color: white;
+  color: black;
+  width: min-content;
+}
+
 @keyframes shimmer {
   0% {    
     border-image: linear-gradient(0deg, rgb(0, 71, 0), lightgreen);  
     border-image-slice: 1;
   }
-
+  
   25% {
     
     border-image: linear-gradient(90deg,  rgb(0, 71, 0), lightgreen);  
     border-image-slice: 1;
-
+    
   }
   50% {
     border-image: linear-gradient(180deg,  rgb(0, 71, 0), lightgreen);  
@@ -152,6 +170,7 @@ ul#characters {
       align-items: center;
       
       > button {
+        user-select: none;
         width: 50px;
         display: grid;
         grid-template-rows: 15px;
@@ -224,6 +243,7 @@ ul#characters {
     background-color: yellow;
     font-weight: 600;
     border-radius: 5px;
+    user-select: none;
   }
 }
 
@@ -251,12 +271,106 @@ main > header {
   filter: blur(33px);
 }
 
+#top-ten {
+  border: 5px double black;
+  padding: 1rem;
+  width: 280px;
+}
+
+#top-ten-dialog {
+  border-radius: 20px;
+}
 #top-ten-dialog > p {
   padding: 1rem;
   font-family: fantasy;
   letter-spacing: 0.1ch;
   color: #86572e;
+  text-align: center;
+  font-size: x-large;
+  margin-top: .5rem;
+  border: 5px double black;
+  padding: 1rem;
+  
+  background-color: 	hsl(78, 100%, 92%)
 }
+
+#top-ten-dialog > button {
+  position: absolute;
+  border: none;
+  background-color: transparent;
+  font-size: 10px;
+  transform: scale(1.4,1.1);
+  max-width: 3ch;
+  max-height: 3ch;
+  margin: 0px;
+  box-sizing: content-box;
+  top: 1px;
+  right: 4px;
+  background-color: #ffd314;
+  border-radius: 0;
+  border-bottom-left-radius: 3px;
+  user-select: none;
+  cursor: pointer;
+}
+
+#top-ten-dialog #top-ten-list > li.shimmer {
+  border: .3rem solid blue; 
+  border-image: linear-gradient(0deg, rgb(0, 71, 0), lightgreen);  
+  border-image-slice: 1;  
+  animation: 2s cubic-bezier(0.1, -0.6, 0.2, 0) infinite alternate shimmer;
+}
+
+#top-ten-dialog #top-ten-list > li {
+  width: 100%;
+  background-color: 	hsl(78, 100%, calc(92% - sibling-index() * 5%));
+
+  > div:last-child {
+    text-align: end;
+  }
+
+  > div:first-child {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    
+    
+    > input {
+      border-radius: 10px;
+      border-color: white;
+      padding: 3px;
+    }
+    
+    > button {    
+      border-color: white;
+      aspect-ratio: 1;
+      height: max-content;
+      width: max-content;
+      padding: 1px 4px;
+      border-radius: 50%;
+    }
+  }
+}
+#top-ten-dialog #top-ten-list {
+  
+  margin-left: 1rem;
+  font-size: large;
+  font-family: cursive;
+  border-radius: 10px;
+  
+  > li {
+    
+    padding: 5px;
+    margin: 1px;
+    
+    > div:nth-of-type(2) {
+      
+      font-size: small;
+    }
+  }
+}
+
 
 ul#menu {
   visibility: hidden;
@@ -292,12 +406,12 @@ ul#menu {
   padding: 0.5ch;
   text-align: center;
   user-select: none;
-      background-color: red;
-    color: white;
+  background-color: red;
+  color: white;
 }
 
 @media only screen and (max-width: 600px) {
-  ul {
+  ul:not(#top-ten-list) {
     display: flex;
     flex-direction: column;
     
