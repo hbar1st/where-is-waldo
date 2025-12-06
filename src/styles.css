@@ -77,14 +77,18 @@ ul#characters {
   animation: 2s cubic-bezier(0.1, -0.6, 0.2, 0) infinite alternate shimmer;
 }
 
-#tag {
+.tag.notfound {
+  display: none;
+}
+
+.tag {
   background-color: transparent;
   color: transparent;
   z-index: 2;
   position: absolute;
 }
 
-#tag:hover {
+.tag:hover {
   background-color: white;
   color: black;
   width: min-content;
@@ -290,6 +294,7 @@ main > header {
   margin-top: .5rem;
   border: 5px double black;
   padding: 1rem;
+  user-select: none;
   
   background-color: 	hsl(78, 100%, 92%)
 }

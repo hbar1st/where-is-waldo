@@ -1,6 +1,6 @@
 export { landingPage };
 
-  let imageListener;
+let imageListener;
 
 async function landingPage(docObj) {
   const dialog = docObj.querySelector("#top-ten-dialog");
@@ -12,8 +12,8 @@ async function landingPage(docObj) {
   const messageEl = docObj.querySelector("#message");
   const topTenMessageEl = docObj.querySelector("#top-ten-message");
   
-
-
+  
+  
   // get the game response and characters to setup the play
   const setupresponse = async (api) => {
     // first check that this is not a continuation of an existing session
@@ -45,7 +45,7 @@ async function landingPage(docObj) {
           ".game > section:last-of-type"
         );
         sceneSection.classList.add("blur"); // we start out with a blurred image until the game is started officially
-
+        
       }
       
       const response = await fetch(`${api}/scene`, {
@@ -91,6 +91,7 @@ async function landingPage(docObj) {
           topTenMessageEl.innerText = h2;
           
           // add event listener to the scene
+          // but only if there is still any characters to be found so need to fetch the game to check
           
           imageListener = (e) =>
             displayChoice(e, docObj, api, { sceneId, imgRef: sceneImage });
@@ -107,8 +108,8 @@ async function landingPage(docObj) {
           
           resolutionButton.addEventListener("click", () =>
             resolutionToggle(resolutionButton, sceneImage)
-          );
-          
+        );
+        
         startButton.addEventListener("click", async () => {
           // starts the game
           const gameData = getGameData(api);
@@ -149,7 +150,7 @@ function displayGeneralError(messageEl) {
 
 function updateCharactersList(docObj, characterData) {
   const charactersList = docObj.querySelector("#characters");
-
+  
   let sceneCharacters = "";
   
   characterData.characters.forEach((el, i, arr) => {
@@ -193,7 +194,7 @@ function updateSceneImage(docObj, sceneData) {
   const sceneSection = docObj.querySelector("#scene");
   
   const imageEnclosure = docObj.querySelector("#image-enclosure");
-
+  
   console.log("ss: ", sceneSection);
   const image = new Image();
   image.src = sceneData.url;
@@ -203,27 +204,28 @@ function updateSceneImage(docObj, sceneData) {
   return image;
 }
 
-      /**
-      * sample topten when the first user gets into it
-      * {
-      "message": "Success",
-      "id": 1,
-      "topTen": [
-      {
-      "id": 1,
-      "username": "anonymous",
-      "elapsed_time": "00:00:25.148"
-      }
-      ]
-      }
-      */
+/**
+* sample topten when the first user gets into it
+* {
+"message": "Success",
+"id": 1,
+"topTen": [
+{
+"id": 1,
+"username": "anonymous",
+"elapsed_time": "00:00:25.148"
+}
+]
+}
+*/
 async function showTopTen(e, docObj, api, sceneId, dialog) {
   
+  console.log("in showTopTen after receiving a click event")
   // if e.detail is set, we can check the key inTopTen to see whether the user gets to enter their username or not
   dialog.showModal();
   
   const topTenForm = docObj.querySelector("#top-ten");
-
+  
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
   const ttResponse = await fetch(`${api}/scene/${sceneId}/topten`, {
@@ -234,7 +236,7 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
   if ((ttResponse.ok || ttResponse.status === 304) && ttResponse.body) {
     const topTen = await ttResponse.json();
     console.log(topTen);
-      const paragraphEl = docObj.querySelector("#top-ten-dialog>p");
+    const paragraphEl = docObj.querySelector("#top-ten-dialog>p");
     if (topTen.topTen.length === 0) {
       
       paragraphEl.innerText = "No top scores recorded yet! Be the first!";
@@ -258,6 +260,8 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
           const inputEl = docObj.createElement("input")
           inputEl.setAttribute("type", "text");
           inputEl.setAttribute("id", "username");
+          inputEl.setAttribute("minlength", 1);
+          inputEl.setAttribute("maxlength", 25)
           if (el.username === "anonymous") {
             inputEl.setAttribute("placeholder", "Enter your name");
           } else {
@@ -267,9 +271,30 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
           const saveBtn = docObj.createElement("button");
           saveBtn.setAttribute("type", "submit");
           saveBtn.innerText = "\u2714";
-          nameListItem.appendChild(inputEl)
-          nameListItem.appendChild(inputEl)
-          
+          saveBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(topTenForm);
+            for (const value of formData.values()) {
+              console.log(value);
+            }
+            const response = await fetch(`${api}/game`, {
+              method: "POST",
+              body: formData,
+              credentials: "include",
+            });
+            
+            if ((response.ok || response.status === 304) && response.body) {
+              const data = response.json();
+              console.log(data);
+              //TODO need to update the form to hide the input and button (user cannot change their name once it is saved one time)
+              nameListItem.removeChild(saveBtn);
+              nameListItem.removeChild(inputEl);
+              listEl.classList.remove("shimmer");
+              nameListItem.innerText = formData.username;
+            }
+          })
+          nameListItem.appendChild(inputEl);
+          nameListItem.appendChild(inputEl);          
           nameListItem.appendChild(saveBtn);
         } else {
           nameListItem.innerText = el.username;
@@ -312,6 +337,10 @@ async function displayChoice(e, docObj, api, {sceneId, imgRef}) {
   console.log(gameData);
   const characterData = gameData.game.scene.characters;
   
+  if (characterData.length === 0) {
+    // this game is done, don't respond to this click
+    return;
+  }
   const imgLength = Math.min(
     stripPx(getComputedStyle(imgRef).width),
     stripPx(getComputedStyle(imgRef).height)
@@ -499,10 +528,10 @@ async function characterChoiceHandler(target, docObj, api, x, y, { sceneId, imgR
     tagWindow.style.width = targettingWindow.style.width;
     tagWindow.style.aspectRatio = 1;
     tagWindow.style.top = targettingWindow.style.top;
-    tagWindow.style.left = targettingWindow.style.top;
+    tagWindow.style.left = targettingWindow.style.left;
     tagWindow.innerText = selectedCharacter;
     tagWindow.classList.add("tag");
-
+    
     const sceneEl = docObj.querySelector("#scene");
     sceneEl.appendChild(tagWindow);
     if (gameData.inTopTen && gameData["end_time"]) {
@@ -512,6 +541,7 @@ async function characterChoiceHandler(target, docObj, api, x, y, { sceneId, imgR
       const inTopTen = gameData.inTopTen === "true";
       
       // stop listening to scene clicks
+      console.log("should remove the event listener now")
       imgRef.removeEventListener("mousedown", imageListener);
       
       const topTenResponse = await fetch(`${api}/scene/${sceneId}/topten`, {
