@@ -9,5 +9,4 @@ Nice to have feature for the future:
 
 
 TODOs:
-- once the user closes the top ten, reset the page so the focus is on the top ten button (so the page is scrolled back to the top/left)
 - work on the bonus of adding different scenes into the db and allowing the user to select from them
