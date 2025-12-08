@@ -754,6 +754,7 @@ function showCheckingMsg(docObj) {
   feedbackDiv.style.visibility = "visible";
   feedbackDiv.style.width = "max-content";
   feedbackDiv.style.backgroundColor = "white";
+  feedbackDiv.style.color = "black";
   feedbackDiv.innerText = "Checking..."
     if (menuRef.getAttribute("data-top") === "true") {
       console.log("found data-top: ", stripPx(menuRef.style.top));
@@ -778,6 +779,7 @@ function showFeedbackMsg(docObj, wrong=true) {
   feedbackDiv.style.visibility = "visible";
   feedbackDiv.style.width = "max-content";
   feedbackDiv.style.backgroundColor = wrong ? "red" : "green";
+  feedbackDiv.style.color = "white";
   feedbackDiv.innerText = wrong ? "Wrong Answer!" : "Correct!";
 
   if (menuRef.getAttribute("data-top") === "true") {
