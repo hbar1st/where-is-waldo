@@ -30,7 +30,7 @@ async function landingPage(docObj) {
         const checkResume = await checkResumeResponse.json();
         resumedGame = checkResume.message === "true";
       }
-
+      messageEl.innerText = "";
       if (resumedGame) {
         console.log("user resumes the game");
         topTenMessageEl.innerText = "Game is ongoing.";
@@ -69,6 +69,15 @@ async function landingPage(docObj) {
             // change the message next to the top ten to say to click the button to see your score
             updateMessages(docObj);
             completedGame = true;
+
+            // make all the tags visible permanently
+            const tags = docObj.querySelectorAll(".tag");
+            tags.forEach((el) => {
+              el.style.backgroundColor = "#ffffffc2";
+              el.style.color = "black";
+              el.style.width = "min-content";
+              el.style.maxWidth = "min-content";
+            });
           }
           
         } else {
@@ -680,10 +689,19 @@ async function characterChoiceHandler(
       if (gameData["end_time"]) {
         // stop listening to scene clicks
         imgRef.removeEventListener("mousedown", imageListener);
+
+        // make all the tags visible permanently
+        const tags = docObj.querySelectorAll(".tag");
+        tags.forEach((el) => {
+          el.style.backgroundColor = "#ffffffc2";
+          el.style.color = "black";
+          el.style.width = "min-content";
+        });
+
         // show top ten dialog
         
-
         const showButton = docObj.querySelector("#show-top-ten");
+        showButton.focus();
         showButton.dispatchEvent(new Event("click"));
       }
     } else if (getGameResponse.status === 200) {
