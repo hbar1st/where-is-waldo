@@ -25,6 +25,7 @@ async function landingPage(docObj) {
         credentials: "include",
       });
       let resumedGame = false;
+      let completedGame = false;
       if (checkResumeResponse.ok || checkResumeResponse.status === 304) {
         const checkResume = await checkResumeResponse.json();
         resumedGame = checkResume.message === "true";
@@ -63,15 +64,16 @@ async function landingPage(docObj) {
               )
             );
           }
-          /*
-          if (answersResponse.gameAnswers.length === ) {
+          
+          if (gameData.game.end_time ) {
             // change the message next to the top ten to say to click the button to see your score
             const objectiveText = docObj.querySelector("#objective");
             objectiveText.innerText = "Well done! You found these characters: ";
             topTenMessageEl.innerText =
               "You've found them all! Click the Top Ten button to see your score!";
+            completedGame = true;
           }
-          */
+          
         } else {
           console.log(`Failed call to GET ${api}/game/answers`);
           throw new TypeError("Oops, we can't resume your game right now!");
@@ -121,17 +123,18 @@ async function landingPage(docObj) {
           // prepare statement on the scene characters
           //const sceneCharacters = characterData.characters.reduce((acc, el, i, arr) => i < arr.length - 1 ? acc += ", " + el : acc += " and " + el)
           const h1 = `Let's find ${sceneCharacters}!`;
-          const h2 = `This game will be timed! Will your time earn you a place in the top ten ?`;
-          messageEl.innerText = h1;
-          topTenMessageEl.innerText = h2;
+          const h2 = `This game will be timed! Will your time earn you a place in the top ten?`;
+          if (!completedGame) {
+            messageEl.innerText = h1;
+            topTenMessageEl.innerText = h2;
+          
+            // add event listener to the scene
+            // but only if there is still any characters to be found so need to fetch the game to check
 
-          // add event listener to the scene
-          // but only if there is still any characters to be found so need to fetch the game to check
-
-          imageListener = (e) =>
-            displayChoice(e, docObj, api, { sceneId, imgRef: sceneImage });
-          sceneImage.addEventListener("mousedown", imageListener);
-
+            imageListener = (e) =>
+              displayChoice(e, docObj, api, { sceneId, imgRef: sceneImage });
+            sceneImage.addEventListener("mousedown", imageListener);
+          }
           // "Show the dialog" button opens the dialog modally
           showButton.addEventListener("click", (e) =>
             showTopTen(e, docObj, api, sceneId, dialog)
@@ -291,6 +294,9 @@ function updateSceneImage(docObj, sceneData) {
 */
 async function showTopTen(e, docObj, api, sceneId, dialog) {
   console.log("in showTopTen after receiving a click event");
+
+  const inTopTen = false;
+
   // if e.detail is set, we can check the key inTopTen to see whether the user gets to enter their username or not
   dialog.showModal();
 
@@ -386,6 +392,7 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
 
         const nameListItem = docObj.createElement("div");
         if (el.id === topTen.id) {
+          inTopTen = true;
           listEl.classList.add("shimmer");
           const inputEl = docObj.createElement("input");
           inputEl.setAttribute("type", "text");
@@ -686,7 +693,7 @@ async function characterChoiceHandler(
           headers,
           credentials: "include",
         });
-        if (topTenResponse.status === 201 && topTenResponse.body) {
+        if (topTenResponse.ok && topTenResponse.body) {
           // check if the user id is in the list of top ten scores and if yes, trigger the top ten dialog
 
           const topTenData = await topTenResponse.json();
