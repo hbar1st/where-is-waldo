@@ -55,6 +55,10 @@ async function landingPage(docObj) {
             gameData.game.gameAnswers &&
             gameData.game.gameAnswers.length > 0
           ) {
+            
+            const sceneEl = docObj.querySelector("#scene");
+            const existingTags = docObj.querySelectorAll(".tag"); 
+            existingTags.forEach(el => sceneEl.removeChild(el));
             gameData.game.gameAnswers.forEach((el) =>
               setupTag(
                 docObj,
@@ -664,6 +668,7 @@ async function characterChoiceHandler(
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
   try {
+    showCheckingMsg(docObj);
     const getGameResponse = await fetch(
       `${api}/game/answer?x=${normalizedX}&y=${normalizedY}&character=${selectedCharacter}`,
       {
@@ -738,6 +743,31 @@ function setupTag(docObj, x, y, character) {
   sceneEl.appendChild(tagWindow);
 }
 
+function showCheckingMsg(docObj) {
+  
+  const feedbackDiv = docObj.querySelector("#feedback");
+  const menuRef = docObj.querySelector("#menu");
+  feedbackDiv.style.positionAnchor = "--msg-anchor";
+  feedbackDiv.style.position = "fixed";
+  feedbackDiv.style.opacity = ".85";
+  feedbackDiv.style.positionArea = "";
+  feedbackDiv.style.visibility = "visible";
+  feedbackDiv.style.width = "max-content";
+  feedbackDiv.style.backgroundColor = "white";
+  feedbackDiv.innerText = "Checking..."
+    if (menuRef.getAttribute("data-top") === "true") {
+      console.log("found data-top: ", stripPx(menuRef.style.top));
+      feedbackDiv.style.positionArea += "top";
+    } else {
+      feedbackDiv.style.positionArea += "bottom";
+    }
+    if (menuRef.getAttribute("data-left") === "true") {
+      console.log("found data-left: ", stripPx(menuRef.style.left));
+      feedbackDiv.style.positionArea += " left";
+    } else {
+      feedbackDiv.style.positionArea += " right";
+    }
+}
 function showFeedbackMsg(docObj, wrong=true) {
   const feedbackDiv = docObj.querySelector("#feedback");
   const menuRef = docObj.querySelector("#menu");
