@@ -26,6 +26,7 @@ main {
 }
 
 ul#characters {
+  margin-left: 1rem;
   grid-column: 2;
   display: grid;
   grid-template-rows: min(20dvh, 150px);
@@ -298,6 +299,11 @@ main > header {
 
 #top-ten-dialog {
   border-radius: 20px;
+  width: 280px;
+
+  & h1 {
+    font-size: 1.2rem;
+  }
 }
 #top-ten-dialog > p {
   padding: 1rem;
@@ -308,7 +314,7 @@ main > header {
   font-size: x-large;
   margin-top: 0.5rem;
   border: 5px double black;
-  padding: 1rem;
+  padding: .5rem;
   user-select: none;
 
   background-color: hsl(78, 100%, 92%);
@@ -343,6 +349,8 @@ main > header {
 #top-ten-dialog #top-ten-list > li {
   width: 100%;
   background-color: hsl(78, 100%, calc(92% - sibling-index() * 5%));
+  user-select: none;
+  font-size: small;
 
   > div:last-child {
     text-align: end;
@@ -371,23 +379,24 @@ main > header {
 
     > button#edit {
       background-color: transparent;
-      border-radius: 0;
       border: none;
+
+      box-shadow: 1px 1px 1px #524397, 0px -1px 1px #c5d78d;
+      border-radius: 50%;
     }
   }
 }
 #top-ten-dialog #top-ten-list {
   margin-left: 1rem;
-  font-size: large;
   font-family: cursive;
   border-radius: 10px;
 
   > li {
-    padding: 5px;
+    padding: 2px 5px;
     margin: 1px;
 
     > div:nth-of-type(2) {
-      font-size: small;
+      font-size: smaller;
     }
   }
 }
@@ -416,7 +425,7 @@ ul#menu {
   }
 }
 
-#wrong {
+#feedback {
   visibility: hidden;
   position: absolute;
   z-index: 2;

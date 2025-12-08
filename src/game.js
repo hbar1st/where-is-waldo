@@ -67,10 +67,7 @@ async function landingPage(docObj) {
           
           if (gameData.game.end_time ) {
             // change the message next to the top ten to say to click the button to see your score
-            const objectiveText = docObj.querySelector("#objective");
-            objectiveText.innerText = "Well done! You found these characters: ";
-            topTenMessageEl.innerText =
-              "You've found them all! Click the Top Ten button to see your score!";
+            updateMessages(docObj);
             completedGame = true;
           }
           
@@ -295,12 +292,13 @@ function updateSceneImage(docObj, sceneData) {
 async function showTopTen(e, docObj, api, sceneId, dialog) {
   console.log("in showTopTen after receiving a click event");
 
-  const inTopTen = false;
+  let inTopTen = false;
 
   // if e.detail is set, we can check the key inTopTen to see whether the user gets to enter their username or not
   dialog.showModal();
 
   const topTenForm = docObj.querySelector("#top-ten");
+  const playerScoreEl = docObj.querySelector("#score");
 
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
@@ -311,8 +309,9 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
   });
   if ((ttResponse.ok || ttResponse.status === 304) && ttResponse.body) {
     const topTen = await ttResponse.json();
-    console.log(topTen);
+    
     const paragraphEl = docObj.querySelector("#top-ten-dialog>p");
+    console.log(topTen);
     if (topTen.topTen.length === 0) {
       paragraphEl.innerText = "No top scores recorded yet! Be the first!";
       topTenForm.style.display = "none";
@@ -336,7 +335,7 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
           }
 
           const response = await fetch(`${api}/game`, {
-            method: "POST",
+            method: "PUT",
             body: urlEncoded,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             credentials: "include",
@@ -345,9 +344,10 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
           if ((response.ok || response.status === 304) && response.body) {
             const data = await response.json();
             console.log(data);
-            //TODO need to update the form to hide the input and button (user cannot change their name once it is saved one time)
-            nameListItem.removeChild(e.target);
-            nameListItem.removeChild(inputEl);
+            if (e.target.parentElement === nameListItem) {
+              nameListItem.removeChild(e.target);
+              nameListItem.removeChild(inputEl);
+            }
             listEl.classList.remove("shimmer");
             nameListItem.innerText = data.game.username;
             const editBtn = docObj.createElement("button");
@@ -427,6 +427,23 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
       console.log("the top ten list: ", topTenList);
       topTenForm.innerHTML = "";
       topTenForm.appendChild(topTenList);
+
+      const scoreMsg = docObj.createElement('h1');
+      playerScoreEl.innerHTML = "";
+      
+      const len = topTen?.elapsed_time?.length;
+      if (inTopTen && len) {
+        scoreMsg.innerText =
+          `Amazing, you're in the Top Ten! You found all the characters in ${topTen.elapsed_time.slice(
+            0,
+            len-4
+          )}`;
+      } else {
+        if (topTen.elapsed_time) {
+          scoreMsg.innerText = `Well done! You found all the characters in ${topTen.elapsed_time.slice(0, len-4)}`
+        }
+      }
+      playerScoreEl.appendChild(scoreMsg);
     }
   }
 }
@@ -447,8 +464,8 @@ function resolutionToggle(resolutionButton, sceneImage) {
 
 async function displayChoice(e, docObj, api, { sceneId, imgRef }) {
   // hide the wrong answer div in case it is currently visible
-  const wrongAnswerDiv = docObj.querySelector("#wrong");
-  wrongAnswerDiv.style.visibility = "hidden";
+  const feedbackDiv = docObj.querySelector("#feedback");
+  feedbackDiv.style.visibility = "hidden";
 
   const gameData = await getGameData(api);
   console.log(gameData);
@@ -632,31 +649,7 @@ async function characterChoiceHandler(
     imgRef.naturalWidth,
     imgRef.naturalHeight
   );
-  /*
-  let normalizedX = ((x / imgRect.width) * 100).toFixed(2);
-  if (normalizedX > 100) {
-    normalizedX = 100;
-    console.log(
-      "how did I get more than 100%? ",
-      x,
-      " / ",
-      imgRef.naturalWidth
-    );
-  }
-  let normalizedY = ((y / imgRect.height) * 100).toFixed(2);
-  if (normalizedY > 100) {
-    normalizedY = 100;
 
-    console.log(
-      "how did I get more than 100%? ",
-      y,
-      " / ",
-      imgRef.naturalHeight
-    );
-  }
-  
-  console.log("normalized to: ", normalizedX, normalizedY);
-  */
   const selectedCharacter = target.textContent;
   console.log("selected Character: ", target, selectedCharacter);
   const headers = new Headers();
@@ -678,34 +671,20 @@ async function characterChoiceHandler(
 
       setupTag(docObj, normalizedX, normalizedY, selectedCharacter);
 
-      if (gameData.inTopTen && gameData["end_time"]) {
-        console.log(
-          "found all the answers! Time to check the top ten list to see if this user made it or not"
-        );
-        const inTopTen = gameData.inTopTen === "true";
+      updateMessages(docObj);
 
+      if (!gameData["end_time"])  {
+        showFeedbackMsg(docObj, false)
+      }
+      
+      if (gameData["end_time"]) {
         // stop listening to scene clicks
-        console.log("should remove the event listener now");
         imgRef.removeEventListener("mousedown", imageListener);
+        // show top ten dialog
+        
 
-        const topTenResponse = await fetch(`${api}/scene/${sceneId}/topten`, {
-          method: "GET",
-          headers,
-          credentials: "include",
-        });
-        if (topTenResponse.ok && topTenResponse.body) {
-          // check if the user id is in the list of top ten scores and if yes, trigger the top ten dialog
-
-          const topTenData = await topTenResponse.json();
-          console.log(
-            "did the user get into the top ten? check the id: ",
-            inTopTen,
-            topTenData
-          );
-          const showButton = docObj.querySelector("#show-top-ten");
-
-          showButton.dispatchEvent(new Event("click"));
-        }
+        const showButton = docObj.querySelector("#show-top-ten");
+        showButton.dispatchEvent(new Event("click"));
       }
     } else if (getGameResponse.status === 200) {
       // this is the wrong answer
@@ -713,7 +692,7 @@ async function characterChoiceHandler(
       const gameData = await getGameResponse.json();
       console.log(gameData);
       if (gameData.message === "Wrong answer") {
-        showWrongAnswerMsg(docObj);
+        showFeedbackMsg(docObj, true);
       }
     } else {
       console.error(
@@ -741,26 +720,36 @@ function setupTag(docObj, x, y, character) {
   sceneEl.appendChild(tagWindow);
 }
 
-function showWrongAnswerMsg(docObj) {
-  const wrongAnswerDiv = docObj.querySelector("#wrong");
+function showFeedbackMsg(docObj, wrong=true) {
+  const feedbackDiv = docObj.querySelector("#feedback");
   const menuRef = docObj.querySelector("#menu");
-  wrongAnswerDiv.style.positionAnchor = "--msg-anchor";
-  wrongAnswerDiv.style.position = "fixed";
-  wrongAnswerDiv.style.opacity = ".85";
-  wrongAnswerDiv.style.positionArea = "";
-  wrongAnswerDiv.style.visibility = "visible";
-  wrongAnswerDiv.style.width = "max-content";
+  feedbackDiv.style.positionAnchor = "--msg-anchor";
+  feedbackDiv.style.position = "fixed";
+  feedbackDiv.style.opacity = ".85";
+  feedbackDiv.style.positionArea = "";
+  feedbackDiv.style.visibility = "visible";
+  feedbackDiv.style.width = "max-content";
+  feedbackDiv.style.backgroundColor = wrong ? "red" : "green";
+  feedbackDiv.innerText = wrong ? "Wrong Answer!" : "Correct!";
 
   if (menuRef.getAttribute("data-top") === "true") {
     console.log("found data-top: ", stripPx(menuRef.style.top));
-    wrongAnswerDiv.style.positionArea += "top";
+    feedbackDiv.style.positionArea += "top";
   } else {
-    wrongAnswerDiv.style.positionArea += "bottom";
+    feedbackDiv.style.positionArea += "bottom";
   }
   if (menuRef.getAttribute("data-left") === "true") {
     console.log("found data-left: ", stripPx(menuRef.style.left));
-    wrongAnswerDiv.style.positionArea += " left";
+    feedbackDiv.style.positionArea += " left";
   } else {
-    wrongAnswerDiv.style.positionArea += " right";
+    feedbackDiv.style.positionArea += " right";
   }
+}
+
+function updateMessages(docObj) {
+  const topTenMessageEl = docObj.querySelector("#top-ten-message");
+  const objectiveText = docObj.querySelector("#objective");
+  objectiveText.innerText = "Well done! You found these characters: ";
+  topTenMessageEl.innerText =
+    "You've found them all! Click the Top Ten button to see your score!";
 }

@@ -1,57 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    <main>
-      <header>
-        <h1 id="message">Loading...</h1>
-      </header>
-      <div class="game" hidden>
-        <section>
-          <p id="objective">Find these characters!</p>
-          <ul id="characters"></ul>
-        </section>
-        <section>
-          <button id="show-top-ten" type="button">Top Ten</button>
-          <h2 id="top-ten-message"></h2>
-        </section>
-        <section>
-          <button id="start" type="button">Start Game!</button>
-          <div>
-            <h2>
-              Click the button to unblur the scene. This will start the timer.
-            </h2>
-            <p>
-              The image is presented in high resolution to help you find the
-              Waldo.
-            </p>
-            <p>
-              You will probably need to scroll to see the whole scene or you can
-              use CTRL[-] to zoom out in your browser.
-            </p>
-          </div>
-        </section>
-        <section id="scene">          
-          <div id="targetting-window"></div>
-          <label for="resolution">
-            <button id="resolution" type="button" ></button>
-            Toggle scene resolution
-          </label>
-          <ul id="menu"></ul>
-          <div id="wrong">Wrong answer!</div>
-          <div id="image-enclosure"></div>
-        </section>
-        <dialog id="top-ten-dialog">
-          <button autofocus>x</button>
-          <p>Loading top ten list...</p>
-          <form method="POST" id="top-ten">
-          </form>
-        </dialog>
-      </div>
-    </main>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<body>
+  <main>
+    <header>
+      <h1 id="message">Loading...</h1>
+    </header>
+    <div class="game" hidden>
+      <section>
+        <p id="objective">Find these characters!</p>
+        <ul id="characters"></ul>
+      </section>
+      <section>
+        <button id="show-top-ten" type="button">Top Ten</button>
+        <h2 id="top-ten-message"></h2>
+      </section>
+      <section>
+        <button id="start" type="button">Start Game!</button>
+        <div>
+          <h2>
+            Click the button to unblur the scene. This will start the timer.
+          </h2>
+          <p>
+            The image is presented in high resolution to help you find the
+            Waldo.
+          </p>
+          <p>
+            You will probably need to scroll to see the whole scene or you can
+            use CTRL[-] to zoom out in your browser.
+          </p>
+        </div>
+      </section>
+      <section id="scene">          
+        <div id="targetting-window"></div>
+        <label for="resolution">
+          <button id="resolution" type="button" ></button>
+          Toggle scene resolution
+        </label>
+        <ul id="menu"></ul>
+        <div id="feedback">Wrong answer!</div>
+        <div id="image-enclosure"></div>
+      </section>
+      <dialog id="top-ten-dialog">
+        <button autofocus>x</button>
+        <div id="score"></div>
+        <p>Loading top ten list...</p>
+        <form method="POST" id="top-ten">
+        </form>
+      </dialog>
+  </div>
+</main>
+</body>
 </html>
