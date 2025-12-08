@@ -34,7 +34,7 @@ async function landingPage(docObj) {
         console.log("user resumes the game");
         topTenMessageEl.innerText = "Game is ongoing.";
         // call GET /game/answers to get the location of the answers the user has given so we can tag them in the scene
-        const answersResponse = await fetch(`${api}/game/answers`, {
+        const answersResponse = await fetch(`${api}/game`, {
           method: "GET",
           headers: headers,
           credentials: "include",
@@ -44,9 +44,34 @@ async function landingPage(docObj) {
           startButton.setAttribute("disabled", true);
           const sceneSection = docObj.querySelector("#scene");
           sceneSection.classList.remove("blur");
-
+          const gameData = await answersResponse.json();
+            console.log(
+              "the answers I need to tag: ",
+              gameData.game
+            );
           // figure out where previous character tags are in the image and add them to the screen if they're in view
-          // also make them listen to mouse-over events to popup their names if that does happen
+          if (
+            gameData.game.gameAnswers &&
+            gameData.game.gameAnswers.length > 0
+          ) {
+            gameData.game.gameAnswers.forEach((el) =>
+              setupTag(
+                docObj,
+                el.location_x,
+                el.location_y,
+                el.character_name.name
+              )
+            );
+          }
+          /*
+          if (answersResponse.gameAnswers.length === ) {
+            // change the message next to the top ten to say to click the button to see your score
+            const objectiveText = docObj.querySelector("#objective");
+            objectiveText.innerText = "Well done! You found these characters: ";
+            topTenMessageEl.innerText =
+              "You've found them all! Click the Top Ten button to see your score!";
+          }
+          */
         } else {
           console.log(`Failed call to GET ${api}/game/answers`);
           throw new TypeError("Oops, we can't resume your game right now!");
@@ -154,42 +179,39 @@ async function landingPage(docObj) {
     }
   };
 
-  await setupresponse(API_URL); // this value is replaced at runtime by webpack (the real value is in the webpack config files)
+  try {
+    await setupresponse(API_URL); // this value is replaced at runtime by webpack (the real value is in the webpack config files)
 
-  const image = docObj.querySelector("#image-enclosure > img");
+    const image = docObj.querySelector("#image-enclosure > img");
     console.log("done setting up");
-    console.log(
-      "width, height of image: ",
-      image.width,
-      image.height
-    );
-  console.log("image node: ", image)
-  if (image) {
+    console.log("width, height of image: ", image.width, image.height);
+    console.log("image node: ", image);
+    if (image) {
+      // Create a resize observer and link it to another callback
+      const rObserver = new ResizeObserver(imageResizeHandler);
 
-    // Create a resize observer and link it to another callback
-    const rObserver = new ResizeObserver(imageResizeHandler);
+      rObserver.observe(image);
+    }
+  } catch (error) {
+    console.error(error);
 
-    rObserver.observe(image)
+    const messageEl = docObj.querySelector("#message");
+    displayGeneralError(messageEl);
   }
 }
 
 const imageResizeHandler = (entries) => {
-    for (const entry of entries) {
-      // Do something to each entry
-      // and possibly something to the observer itself
-      
-      console.log(`The ${entry} was modified.`);
-      
-      if (entry.contentBoxSize) {
-        console.log("size? ", entry.contentBoxSize[0]);
-        const targetWindowRef = document.querySelector("#targetting-window");
-        const targetWindowSize = Math.floor((entry.contentBoxSize[0].inlineSize * 1.9) / 100);
-        targetWindowRef.style.width = makePx(targetWindowSize);
-        console.log("the target window width should change to: ", targetWindowSize)
-      }
+  for (const entry of entries) {
+    if (entry.contentBoxSize) {
+      console.log("size? ", entry.contentBoxSize[0]);
+      const targetWindowRef = document.querySelector("#targetting-window");
+      const targetWindowSize = Math.floor(
+        (entry.contentBoxSize[0].inlineSize * 1.9) / 100
+      );
+      targetWindowRef.style.width = makePx(targetWindowSize);
     }
-}
-
+  }
+};
 
 function displayGeneralError(messageEl) {
   messageEl.innerHTML =
@@ -437,7 +459,7 @@ async function displayChoice(e, docObj, api, { sceneId, imgRef }) {
   const oldMenuRef = docObj.querySelector("#menu");
   const parentEl = oldMenuRef.parentElement;
   const menuRef = docObj.createElement("ul");
-  
+
   menuRef.style.positionAnchor = "--msg-anchor"; //anchor around the targetting-window
   menuRef.setAttribute("id", "menu");
   parentEl.replaceChild(menuRef, oldMenuRef); // have to do this to get rid of unused event listeners from previous clicks
@@ -517,27 +539,36 @@ async function displayChoice(e, docObj, api, { sceneId, imgRef }) {
   // now position the menu to the final position
 
   if (menuRef.getAttribute("data-top") === "true") {
-      menuRef.style.positionArea += "top";
+    menuRef.style.positionArea += "top";
   } else {
-      menuRef.style.positionArea += "bottom";
+    menuRef.style.positionArea += "bottom";
   }
   if (menuRef.getAttribute("data-left") === "true") {
-      menuRef.style.positionArea += " span-left";
+    menuRef.style.positionArea += " span-left";
   } else {
-      menuRef.style.positionArea += " span-right";
+    menuRef.style.positionArea += " span-right";
   }
   menuRef.style.visibility = "visible";
   menuRef.classList.add("shimmer");
 
   // as for the targetting window, center it around the clicked position
-  
-  const normalizedX = ((e.clientX - targetWindowApothem - imgRect.x) * 100 / imgRef.width).toFixed(3);
+
+  const normalizedX = (
+    ((e.clientX - targetWindowApothem - imgRect.x) * 100) /
+    imgRef.width
+  ).toFixed(3);
   const normalizedY = (
     ((e.clientY - targetWindowApothem - imgRect.y) * 100) /
     imgRef.height
   ).toFixed(3);
 
-  console.log("normalizedX, normalizedY: ", normalizedX, normalizedY, imgRef.width, imgRef.height);
+  console.log(
+    "normalizedX, normalizedY: ",
+    normalizedX,
+    normalizedY,
+    imgRef.width,
+    imgRef.height
+  );
   targetWindowRef.style.left = `anchor(${normalizedX}%)`;
   targetWindowRef.style.top = `anchor(${normalizedY}%)`;
   targetWindowRef.style.visibility = "visible";
@@ -559,8 +590,8 @@ async function displayChoice(e, docObj, api, { sceneId, imgRef }) {
         docObj,
         api,
 
-        (e.clientX - imgRect.x).toFixed(2),
-        (e.clientY - imgRect.y).toFixed(2),
+        normalizedX,
+        normalizedY,
 
         { sceneId, imgRef, imgRect }
       );
@@ -582,19 +613,19 @@ async function characterChoiceHandler(
   target,
   docObj,
   api,
-  x,
-  y,
+  normalizedX,
+  normalizedY,
   { sceneId, imgRef, imgRect }
 ) {
   console.log(
     "in characterChoiceHandler: ",
     target.innerText,
-    x,
-    y,
+    normalizedX,
+    normalizedY,
     imgRef.naturalWidth,
     imgRef.naturalHeight
   );
-
+  /*
   let normalizedX = ((x / imgRect.width) * 100).toFixed(2);
   if (normalizedX > 100) {
     normalizedX = 100;
@@ -616,86 +647,96 @@ async function characterChoiceHandler(
       imgRef.naturalHeight
     );
   }
+  
   console.log("normalized to: ", normalizedX, normalizedY);
+  */
   const selectedCharacter = target.textContent;
   console.log("selected Character: ", target, selectedCharacter);
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
-  const getGameResponse = await fetch(
-    `${api}/game/answer?x=${normalizedX}&y=${normalizedY}&character=${selectedCharacter}`,
-    {
-      method: "PUT",
-      headers,
-      credentials: "include",
-    }
-  );
-  if (getGameResponse.ok && getGameResponse.body) {
-    console.log("if it is the correct answer");
-    const gameData = await getGameResponse.json();
-    console.log(gameData);
-    // start by tagging the character selected with the name
-
-    const targettingWindow = docObj.querySelector("#targetting-window");
-    const tagWindow = docObj.createElement("div");
-    tagWindow.style.borderRadius = "50%";
-    tagWindow.style.width = targettingWindow.style.width;
-    tagWindow.style.aspectRatio = 1;
-    tagWindow.style.top = targettingWindow.style.top;
-    tagWindow.style.left = targettingWindow.style.left;
-    tagWindow.innerText = selectedCharacter;
-    tagWindow.classList.add("tag");
-
-    const sceneEl = docObj.querySelector("#scene");
-    sceneEl.appendChild(tagWindow);
-    if (gameData.inTopTen && gameData["end_time"]) {
-      console.log(
-        "found all the answers! Time to check the top ten list to see if this user made it or not"
-      );
-      const inTopTen = gameData.inTopTen === "true";
-
-      // stop listening to scene clicks
-      console.log("should remove the event listener now");
-      imgRef.removeEventListener("mousedown", imageListener);
-
-      const topTenResponse = await fetch(`${api}/scene/${sceneId}/topten`, {
-        method: "GET",
+  try {
+    const getGameResponse = await fetch(
+      `${api}/game/answer?x=${normalizedX}&y=${normalizedY}&character=${selectedCharacter}`,
+      {
+        method: "PUT",
         headers,
         credentials: "include",
-      });
-      if (topTenResponse.status === 201 && topTenResponse.body) {
-        // check if the user id is in the list of top ten scores and if yes, trigger the top ten dialog
-
-        const topTenData = await topTenResponse.json();
-        console.log(
-          "did the user get into the top ten? check the id: ",
-          inTopTen,
-          topTenData
-        );
-        const showButton = docObj.querySelector("#show-top-ten");
-
-        showButton.dispatchEvent(new Event("click"));
       }
-    }
-  } else if (getGameResponse.status === 200) {
-    // this is the wrong answer
-
-    const gameData = await getGameResponse.json();
-    console.log(gameData);
-    if (gameData.message === "Wrong answer") {
-      showWrongAnswerMsg(docObj);
-    }
-  } else {
-    console.error(
-      "top ten list response was not what we expected for this part of the game"
     );
-    throw new Error("Couldn't fetch the top ten list.")
+    if (getGameResponse.status === 201 && getGameResponse.body) {
+      console.log("if it is the correct answer");
+      const gameData = await getGameResponse.json();
+      console.log(gameData);
+      // start by tagging the character selected with the name
+
+      setupTag(docObj, normalizedX, normalizedY, selectedCharacter);
+
+      if (gameData.inTopTen && gameData["end_time"]) {
+        console.log(
+          "found all the answers! Time to check the top ten list to see if this user made it or not"
+        );
+        const inTopTen = gameData.inTopTen === "true";
+
+        // stop listening to scene clicks
+        console.log("should remove the event listener now");
+        imgRef.removeEventListener("mousedown", imageListener);
+
+        const topTenResponse = await fetch(`${api}/scene/${sceneId}/topten`, {
+          method: "GET",
+          headers,
+          credentials: "include",
+        });
+        if (topTenResponse.status === 201 && topTenResponse.body) {
+          // check if the user id is in the list of top ten scores and if yes, trigger the top ten dialog
+
+          const topTenData = await topTenResponse.json();
+          console.log(
+            "did the user get into the top ten? check the id: ",
+            inTopTen,
+            topTenData
+          );
+          const showButton = docObj.querySelector("#show-top-ten");
+
+          showButton.dispatchEvent(new Event("click"));
+        }
+      }
+    } else if (getGameResponse.status === 200) {
+      // this is the wrong answer
+
+      const gameData = await getGameResponse.json();
+      console.log(gameData);
+      if (gameData.message === "Wrong answer") {
+        showWrongAnswerMsg(docObj);
+      }
+    } else {
+      console.error(
+        "top ten list response was not what we expected for this part of the game"
+      );
+      throw new Error("Couldn't fetch the top ten list.");
+    }
+  } catch (error) {
+    console.error(error);
+
+    const messageEl = docObj.querySelector("#message");
+    displayGeneralError(messageEl);
   }
+}
+
+function setupTag(docObj, x, y, character) {
+  const tagWindow = docObj.createElement("div");
+  tagWindow.style.top = `anchor(${y}%)`;
+  tagWindow.style.left = `anchor(${x}%)`;
+  tagWindow.innerText = character;
+  tagWindow.classList.add("tag");
+  tagWindow.setAttribute("anchor-name", `--${character}`);
+
+  const sceneEl = docObj.querySelector("#scene");
+  sceneEl.appendChild(tagWindow);
 }
 
 function showWrongAnswerMsg(docObj) {
   const wrongAnswerDiv = docObj.querySelector("#wrong");
   const menuRef = docObj.querySelector("#menu");
-  const targettingWindow = docObj.querySelector("#targetting-window");
   wrongAnswerDiv.style.positionAnchor = "--msg-anchor";
   wrongAnswerDiv.style.position = "fixed";
   wrongAnswerDiv.style.opacity = ".85";
@@ -705,15 +746,12 @@ function showWrongAnswerMsg(docObj) {
 
   if (menuRef.getAttribute("data-top") === "true") {
     console.log("found data-top: ", stripPx(menuRef.style.top));
-    //wrongAnswerDiv.style.top = makePx(stripPx(menuRef.style.top) + 60); // relocate the msg as it is only one line compared to the menu
-
     wrongAnswerDiv.style.positionArea += "top";
   } else {
     wrongAnswerDiv.style.positionArea += "bottom";
   }
   if (menuRef.getAttribute("data-left") === "true") {
     console.log("found data-left: ", stripPx(menuRef.style.left));
-    // wrongAnswerDiv.style.left = makePx(stripPx(menuRef.style.left) + 50); //relocate the msg as it is shorter than the menu
     wrongAnswerDiv.style.positionArea += " left";
   } else {
     wrongAnswerDiv.style.positionArea += " right";
