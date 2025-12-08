@@ -13,6 +13,10 @@ main {
   cursor: pointer;
 }
 
+.anchor {
+  anchor-name: --scene;
+}
+
 #scene #image-enclosure {
   user-select: none;
   grid-column: 1 / -1;
@@ -60,7 +64,10 @@ ul#characters {
   visibility: hidden;
   z-index: 3;
   position: absolute;
+  position-anchor: --scene;
   
+  anchor-name: --msg-anchor;
+
   /*
   width: 33px;
   height: 33px;
@@ -318,7 +325,7 @@ main > header {
   cursor: pointer;
 }
 
-#top-ten-dialog #top-ten-list > li.shimmer {
+#top-ten-dialog #top-ten-list > .shimmer {
   border: .3rem solid blue; 
   border-image: linear-gradient(0deg, rgb(0, 71, 0), lightgreen);  
   border-image-slice: 1;  
@@ -336,9 +343,8 @@ main > header {
   > div:first-child {
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     
     
     > input {
@@ -354,6 +360,12 @@ main > header {
       width: max-content;
       padding: 1px 4px;
       border-radius: 50%;
+    }
+
+    > button#edit {
+          background-color: transparent;
+    border-radius: 0;
+    border: none;
     }
   }
 }
@@ -381,7 +393,6 @@ ul#menu {
   visibility: hidden;
   display: flex;
   width: max-content;
-  flex-wrap: no-wrap;
   flex-direction: column;
   list-style-type: none;
   position: absolute;
