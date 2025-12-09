@@ -685,10 +685,13 @@ async function characterChoiceHandler(
 
       setupTag(docObj, normalizedX, normalizedY, selectedCharacter);
 
-      updateMessages(docObj);
 
-      if (!gameData["end_time"])  {
+      if (!gameData["end_time"]) {
+        
+      
         showFeedbackMsg(docObj, false)
+      } else {
+        updateMessages(docObj);
       }
       
       if (gameData["end_time"]) {
