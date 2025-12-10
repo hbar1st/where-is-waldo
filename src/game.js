@@ -1,8 +1,8 @@
-export { landingPage };
+export { game };
 
 let imageListener;
 
-async function landingPage(docObj) {
+async function game(docObj, sceneId) {
   const dialog = docObj.querySelector("#top-ten-dialog");
   const startButton = docObj.querySelector("#start");
   const showButton = docObj.querySelector("#show-top-ten");
@@ -13,13 +13,15 @@ async function landingPage(docObj) {
   const topTenMessageEl = docObj.querySelector("#top-ten-message");
 
   // get the game response and characters to setup the play
-  const setupresponse = async (api) => {
-    // first check that this is not a continuation of an existing session
+  const setupResponse = async (api, sceneId) => {
+    
+    const sceneRoute = `${api}/scene/${sceneId}`;
 
+    // first check that this is not a continuation of an existing session
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
     try {
-      const checkResumeResponse = await fetch(`${api}/resumeGame`, {
+      const checkResumeResponse = await fetch(`${sceneRoute}/resumeGame`, {
         method: "GET",
         headers: headers,
         credentials: "include",
@@ -35,7 +37,7 @@ async function landingPage(docObj) {
         console.log("user resumes the game");
         topTenMessageEl.innerText = "Game is ongoing.";
         // call GET /game/answers to get the location of the answers the user has given so we can tag them in the scene
-        const answersResponse = await fetch(`${api}/game`, {
+        const answersResponse = await fetch(`${sceneRoute}/game`, {
           method: "GET",
           headers: headers,
           credentials: "include",
@@ -69,7 +71,7 @@ async function landingPage(docObj) {
             );
           }
           
-          if (gameData.game.end_time ) {
+          if (gameData.game.elapsed_time ) {
             // change the message next to the top ten to say to click the button to see your score
             updateMessages(docObj);
             completedGame = true;
@@ -85,7 +87,7 @@ async function landingPage(docObj) {
           }
           
         } else {
-          console.log(`Failed call to GET ${api}/game/answers`);
+          console.log(`Failed call to GET ${sceneRoute}/game/answers`);
           throw new TypeError("Oops, we can't resume your game right now!");
         }
       } else {
@@ -95,12 +97,11 @@ async function landingPage(docObj) {
         sceneSection.classList.add("blur"); // we start out with a blurred image until the game is started officially
       }
 
-      const response = await fetch(`${api}/scene`, {
+      const response = await fetch(`${sceneRoute}`, {
         method: "GET",
         headers: headers,
         credentials: "include",
       });
-      console.log("response type: ", response.type);
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         throw new TypeError("Oops, we haven't got JSON!");
@@ -109,9 +110,9 @@ async function landingPage(docObj) {
       if ((response.ok || response.status === 304) && response.body) {
         const sceneData = await response.json();
         console.log(sceneData);
-        const sceneId = sceneData.id;
+        //const sceneId = sceneData.id;
         const secondResponse = await fetch(
-          `${api}/scene/${sceneId}/characters`,
+          `${sceneRoute}/characters`,
           {
             method: "GET",
             headers: headers,
@@ -161,7 +162,7 @@ async function landingPage(docObj) {
 
           startButton.addEventListener("click", async () => {
             // starts the game
-            const gameData = await getGameData(api);
+            const gameData = await getGameData(sceneRoute);
             console.log("game has started: ", gameData);
             console.log(docObj.cookie);
             // and removes the unnecessary text areas from the page for game mode
@@ -178,22 +179,22 @@ async function landingPage(docObj) {
             el.toggleAttribute("hidden");
           });
         } else {
-          console.log(`Failed call to GET ${api}/game/answers`);
+          console.log(`Failed call to GET ${sceneRoute}/game/answers`);
           throw new TypeError("Oops, we can't setup the game right now!");
         }
       } else {
         console.log(response);
-        displayGeneralError(messageEl);
+        displayGeneralError(docObj);
       }
     } catch (error) {
       console.log("caught an internal error");
-      displayGeneralError(messageEl);
+      displayGeneralError(docObj);
       console.error(error.message);
     }
   };
 
   try {
-    await setupresponse(API_URL); // this value is replaced at runtime by webpack (the real value is in the webpack config files)
+    await setupResponse(API_URL, sceneId); // this value is replaced at runtime by webpack (the real value is in the webpack config files)
 
     const image = docObj.querySelector("#image-enclosure > img");
     console.log("done setting up");
@@ -208,8 +209,7 @@ async function landingPage(docObj) {
   } catch (error) {
     console.error(error);
 
-    const messageEl = docObj.querySelector("#message");
-    displayGeneralError(messageEl);
+    displayGeneralError(docObj);
   }
 }
 
@@ -226,7 +226,10 @@ const imageResizeHandler = (entries) => {
   }
 };
 
-function displayGeneralError(messageEl) {
+export function displayGeneralError(docObj) {
+  const gameElements = docObj.querySelectorAll("main *:not(:first-child)");
+  gameElements.forEach(el => el.innerHTML = "")
+  const messageEl = docObj.querySelector("#message");
   messageEl.innerHTML =
     "<h1>Sorry, something went wrong. We weren't able to setup a game for you to play. Please try again later.";
 }
@@ -254,10 +257,10 @@ function updateCharactersList(docObj, characterData) {
   return sceneCharacters;
 }
 
-async function getGameData(api) {
+async function getGameData(sceneRoute) {
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
-  const getGameResponse = await fetch(`${api}/game`, {
+  const getGameResponse = await fetch(`${sceneRoute}/game`, {
     method: "GET",
     headers: headers,
     credentials: "include",
@@ -288,23 +291,9 @@ function updateSceneImage(docObj, sceneData) {
   return image;
 }
 
-/**
-* sample topten when the first user gets into it
-* {
-"message": "Success",
-"id": 1,
-"topTen": [
-{
-"id": 1,
-"username": "anonymous",
-"elapsed_time": "00:00:25.148"
-}
-]
-}
-*/
 async function showTopTen(e, docObj, api, sceneId, dialog) {
   console.log("in showTopTen after receiving a click event");
-
+  const sceneRoute = `${api}/scene/${sceneId}`
   let inTopTen = false;
 
   // if e.detail is set, we can check the key inTopTen to see whether the user gets to enter their username or not
@@ -315,7 +304,7 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
 
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
-  const ttResponse = await fetch(`${api}/scene/${sceneId}/topten`, {
+  const ttResponse = await fetch(`${sceneRoute}/topten`, {
     method: "GET",
     headers: headers,
     credentials: "include",
@@ -324,7 +313,7 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
     const topTen = await ttResponse.json();
     
     const paragraphEl = docObj.querySelector("#top-ten-dialog>p");
-    console.log(topTen);
+    console.log("topTen route response: ",topTen);
     if (topTen.topTen.length === 0) {
       paragraphEl.innerText = "No top scores recorded yet! Be the first!";
       topTenForm.style.display = "none";
@@ -347,7 +336,7 @@ async function showTopTen(e, docObj, api, sceneId, dialog) {
             urlEncoded.append(key, value);
           }
 
-          const response = await fetch(`${api}/game`, {
+          const response = await fetch(`${sceneRoute}/game`, {
             method: "PUT",
             body: urlEncoded,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -480,7 +469,7 @@ async function displayChoice(e, docObj, api, { sceneId, imgRef }) {
   const feedbackDiv = docObj.querySelector("#feedback");
   feedbackDiv.style.visibility = "hidden";
 
-  const gameData = await getGameData(api);
+  const gameData = await getGameData(`${api}/scene/${sceneId}`);
   console.log(gameData);
   const characterData = gameData.game.scene.characters;
 
@@ -662,7 +651,7 @@ async function characterChoiceHandler(
     imgRef.naturalWidth,
     imgRef.naturalHeight
   );
-
+  const sceneRoute = `${api}/scene/${sceneId}`
   const selectedCharacter = target.textContent;
   console.log("selected Character: ", target, selectedCharacter);
   const headers = new Headers();
@@ -670,7 +659,7 @@ async function characterChoiceHandler(
   try {
     showCheckingMsg(docObj);
     const getGameResponse = await fetch(
-      `${api}/game/answer?x=${normalizedX}&y=${normalizedY}&character=${selectedCharacter}`,
+      `${sceneRoute}/game/answer?x=${normalizedX}&y=${normalizedY}&character=${selectedCharacter}`,
       {
         method: "PUT",
         headers,
@@ -686,15 +675,10 @@ async function characterChoiceHandler(
       setupTag(docObj, normalizedX, normalizedY, selectedCharacter);
 
 
-      if (!gameData["end_time"]) {
-        
-      
+      if (!gameData["elapsed_time"]) {
         showFeedbackMsg(docObj, false)
       } else {
         updateMessages(docObj);
-      }
-      
-      if (gameData["end_time"]) {
         // stop listening to scene clicks
         imgRef.removeEventListener("mousedown", imageListener);
 
@@ -710,6 +694,10 @@ async function characterChoiceHandler(
         
         const showButton = docObj.querySelector("#show-top-ten");
         showButton.focus();
+        showButton.scrollIntoView({
+          behavior: "smooth", 
+          block: "center", 
+        });
         showButton.dispatchEvent(new Event("click"));
       }
     } else if (getGameResponse.status === 200) {
@@ -729,8 +717,7 @@ async function characterChoiceHandler(
   } catch (error) {
     console.error(error);
 
-    const messageEl = docObj.querySelector("#message");
-    displayGeneralError(messageEl);
+    displayGeneralError(docObj);
   }
 }
 
