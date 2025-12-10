@@ -1,5 +1,5 @@
 import "./styles.css";
-import { landingPage } from "./game.js";
+import { landingPage } from "./landingPage.js";
 
 
-landingPage(document);
+landingPage(document, API_URL); // this value is replaced at runtime by webpack (the real value is in the webpack config files)

@@ -6,7 +6,3 @@ Note: this game works on Chrome but not Firefox due to the use of anchors.
 
 Nice to have feature for the future:
 - a way to pause and restart game play (would require the api allow that). The pause would blur the scene again. 
-
-
-TODOs:
-- work on the bonus of adding different scenes into the db and allowing the user to select from them

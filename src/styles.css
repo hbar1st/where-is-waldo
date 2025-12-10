@@ -30,7 +30,9 @@ ul#characters {
   grid-column: 2;
   display: grid;
   grid-template-rows: min(20dvh, 150px);
-  grid-template-columns: 30% 30% 30%;
+  grid-template-columns: auto;
+  grid-auto-flow: column;
+  
   width: max-content;
   list-style-type: none;
   justify-content: stretch;
@@ -285,6 +287,7 @@ ul#characters {
 }
 main > header {
   padding: 1rem;
+  margin-top: 1rem;
 }
 
 .blur {
@@ -314,7 +317,7 @@ main > header {
   font-size: x-large;
   margin-top: 0.5rem;
   border: 5px double black;
-  padding: .5rem;
+  padding: 0.5rem;
   user-select: none;
 
   background-color: hsl(78, 100%, 92%);
@@ -437,6 +440,61 @@ ul#menu {
   background-color: red;
   color: white;
 }
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 1rem;
+
+  > * {
+    margin: 0rem 1rem;
+  }
+
+  > p {
+    max-width: 825px;
+    text-align: justify;
+  }
+
+  > .levels {
+    align-self: flex-start;
+
+    > ul {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      row-gap: 1rem;
+      list-style-type: none;
+      margin-top: 1rem;
+
+      > li {
+        margin-left: 10px;
+        text-align: center;
+        border-radius: 10px;
+        padding: 5px;
+        background-color: black;
+        color: white;
+        
+        border: 5px solid transparent;
+
+        & img {
+          width: 150px;
+          max-width: 150px;
+          max-height: 100px;
+        }
+      }
+      > li:hover {
+        border: 5px solid #84ff57;
+      }
+    }
+  }
+}
+
+  div.intro.align-right {
+    position: absolute;
+    right: 0px;
+    row-gap: 0px;
+  }
 
 @media only screen and (max-width: 600px) {
   ul:not(#top-ten-list) {
