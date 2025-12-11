@@ -3,9 +3,20 @@
   margin: 0;
   box-sizing: border-box;
 }
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: cursive;
+    color: black;
+    background: #78a8bd59;
+}
+
 main {
-  display: flex;
-  flex-direction: column;
+    padding: 2vh 2vw;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
 }
 
 #scene img {
@@ -457,11 +468,14 @@ ul#menu {
   }
 
   > .levels {
-    align-self: flex-start;
+    align-self: center;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
 
     > ul {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       row-gap: 1rem;
       list-style-type: none;
